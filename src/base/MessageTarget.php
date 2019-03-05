@@ -78,6 +78,20 @@ trait MessageTarget
     /**
      * @inheritdoc
      */
+    public function getMessages($criteria = null)
+    {
+        if ($criteria === null) {
+            $criteria = [];
+        }
+
+        $criteria['targetId'] = $this->id;
+
+        return Plugin::getInstance()->getMessages()->findMessages($criteria);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function isAcceptableMessage(Message $message)
     {
         if ($message->getTarget() !== $this) {

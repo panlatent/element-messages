@@ -14,8 +14,9 @@ use craft\base\Model;
 use craft\helpers\DateTimeHelper;
 use craft\validators\DateTimeValidator;
 use panlatent\elementmessages\base\MessageTargetInterface;
+use panlatent\elementmessages\elements\MessageElement;
 use panlatent\elementmessages\events\MessageEvent;
-use yii\base\Event;
+use yii\base\Component;
 use yii\base\InvalidConfigException;
 
 /**
@@ -228,8 +229,8 @@ class Message extends Model
     {
         $target = $this->getTarget();
 
-        if ($target instanceof MessageTargetInterface) {
-            Event::trigger($target, MessageTargetInterface::EVENT_MESSAGE_ARRIVED, new MessageEvent([
+        if ($target instanceof Component && $target->hasEventHandlers(MessageElement::EVENT_MESSAGE_ARRIVED)) {
+            $target->trigger(MessageElement::EVENT_MESSAGE_ARRIVED, new MessageEvent([
                 'message' => $this,
                 'isNew' => $isNew,
             ]));

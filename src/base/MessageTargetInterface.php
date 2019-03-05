@@ -18,8 +18,6 @@ use panlatent\elementmessages\models\Message;
  */
 interface MessageTargetInterface
 {
-    const EVENT_MESSAGE_ARRIVED = 'messageArrived';
-
     /**
      * Returns the total number of received messages.
      *
@@ -49,4 +47,11 @@ interface MessageTargetInterface
      * @return bool
      */
     public function isAcceptableMessage(Message $message): bool;
+
+    /**
+     * Accept a message.
+     *
+     * @param Message $message
+     */
+    public function acceptMessage(Message $message);
 }

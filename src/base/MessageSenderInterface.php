@@ -20,16 +20,6 @@ use panlatent\elementmessages\models\Message;
 interface MessageSenderInterface
 {
     /**
-     * @event
-     *
-    const EVENT_BEFORE_MESSAGE_SEND = 'beforeMessageSend';
-
-    /**
-     * @event
-     */
-    const EVENT_AFTER_MESSAGE_SEND = 'afterMessageSend';
-
-    /**
      * Send a message.
      *
      * @param ElementInterface $target
