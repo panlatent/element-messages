@@ -9,7 +9,11 @@ Element Messages
 [![Craft CMS](https://img.shields.io/badge/Powered_by-Craft_CMS-orange.svg?style=flat)](https://craftcms.com/)
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](https://www.yiiframework.com/)
 
-Element Messages plugin for CraftCMS 3.
+Element messages help the Craft application to establish relationships between 
+three elements: a sender element, a content element, and a target element. This 
+relationship is stored in another database table, which helps reduce the data 
+size of the Craft element relationship table. This should be a better solution
+for sending the same content multiple times (e.g. group sending).
 
 Requirements
 ------------
