@@ -34,3 +34,6 @@ To install the plugin, follow these instructions.
         composer require panlatent/element-messages
 
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Element Messages.
+
+Usages
+------

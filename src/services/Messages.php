@@ -127,7 +127,7 @@ class Messages extends Component
 
         $this->_applyMessageConditions($query, $criteria);
 
-        return (int)$query->count('[[id]]');
+        return (int)$query->count('[[messages.id]]');
     }
 
     /**
@@ -248,6 +248,11 @@ class Messages extends Component
 
         if ($criteria->contentId) {
             $query->andWhere(Db::parseParam('contentId', $criteria->contentId));
+        }
+
+        if ($criteria->contentType) {
+            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.contentId]]');
+            $query->andWhere(Db::parseParam('elements.type', $criteria->contentType));
         }
 
         if ($criteria->firstId) {
