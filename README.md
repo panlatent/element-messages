@@ -9,11 +9,11 @@ Element Messages
 [![Craft CMS](https://img.shields.io/badge/Powered_by-Craft_CMS-orange.svg?style=flat)](https://craftcms.com/)
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](https://www.yiiframework.com/)
 
-Element messages help the Craft application to establish relationships between 
-three elements: a sender element, a content element, and a target element. This 
-relationship is stored in another database table, which helps reduce the data 
-size of the Craft element relationship table. This should be a better solution
-for sending the same content multiple times (e.g. group sending).
+Element messages help your Craft application create messages between two elements and use any one element as the message 
+content. It makes it easy to build relationships between three elements and provides a powerful way to query.We can 
+customize the types of rich and flexible messages by sender element type, target element type and content element type. 
+This relationship is stored in another database table, which helps reduce the data size of the Craft element 
+relationship table. This should be a better solution for sending the same content multiple times (e.g. group sending).
 
 Requirements
 ------------
