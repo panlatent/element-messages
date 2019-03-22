@@ -42,11 +42,6 @@ class MessageCriteria extends Model
     public $contentId;
 
     /**
-     * @var string[]|string|null
-     */
-    public $contentType;
-
-    /**
      * @var int|null First message id
      */
     public $firstId;
@@ -55,6 +50,21 @@ class MessageCriteria extends Model
      * @var int|null Last message id
      */
     public $lastId;
+
+    /**
+     * @var string[]|string|null
+     */
+    public $senderType;
+
+    /**
+     * @var string[]|string|null
+     */
+    public $contentType;
+
+    /**
+     * @var string[]|string|null
+     */
+    public $targetType;
 
     /**
      * @var string Order

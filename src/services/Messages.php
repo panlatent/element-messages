@@ -250,11 +250,6 @@ class Messages extends Component
             $query->andWhere(Db::parseParam('contentId', $criteria->contentId));
         }
 
-        if ($criteria->contentType) {
-            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.contentId]]');
-            $query->andWhere(Db::parseParam('elements.type', $criteria->contentType));
-        }
-
         if ($criteria->firstId) {
             $benchmark = $this->_createQuery()
                 ->select(['postDate', 'sortOrder'])
@@ -275,6 +270,21 @@ class Messages extends Component
             $query->andWhere([ '<=', 'postDate', $benchmark['postDate']])
                 ->andWhere(['<=', 'sortOrder', (int)$benchmark['sortOrder']])
                 ->andWhere(Db::parseParam('id', $criteria->lastId, '!='));
+        }
+
+        if ($criteria->senderType) {
+            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.senderId]]');
+            $query->andWhere(Db::parseParam('elements.type', $criteria->senderType));
+        }
+
+        if ($criteria->targetType) {
+            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.targetId]]');
+            $query->andWhere(Db::parseParam('elements.type', $criteria->targetType));
+        }
+
+        if ($criteria->contentType) {
+            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.contentId]]');
+            $query->andWhere(Db::parseParam('elements.type', $criteria->contentType));
         }
 
         if ($criteria->uid) {
