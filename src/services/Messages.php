@@ -275,18 +275,18 @@ class Messages extends Component
         }
 
         if ($criteria->senderType) {
-            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.senderId]]');
-            $query->andWhere(Db::parseParam('elements.type', $criteria->senderType));
+            $query->leftJoin('{{%elements}} s', '[[s.id]] = [[messages.senderId]]');
+            $query->andWhere(Db::parseParam('s.type', $criteria->senderType));
         }
 
         if ($criteria->targetType) {
-            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.targetId]]');
-            $query->andWhere(Db::parseParam('elements.type', $criteria->targetType));
+            $query->leftJoin('{{%elements}} t', '[[t.id]] = [[messages.targetId]]');
+            $query->andWhere(Db::parseParam('t.type', $criteria->targetType));
         }
 
         if ($criteria->contentType) {
-            $query->leftJoin('{{%elements}} elements', '[[elements.id]] = [[messages.contentId]]');
-            $query->andWhere(Db::parseParam('elements.type', $criteria->contentType));
+            $query->leftJoin('{{%elements}} c', '[[c.id]] = [[messages.contentId]]');
+            $query->andWhere(Db::parseParam('c.type', $criteria->contentType));
         }
 
         if ($criteria->uid) {
