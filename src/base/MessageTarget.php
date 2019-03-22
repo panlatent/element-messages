@@ -92,7 +92,7 @@ trait MessageTarget
     /**
      * @inheritdoc
      */
-    public function isAcceptableMessage(Message $message)
+    public function isAcceptableMessage(Message $message): bool
     {
         if ($message->getTarget() !== $this) {
             return false;
