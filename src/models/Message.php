@@ -33,6 +33,11 @@ use yii\base\InvalidConfigException;
  */
 class Message extends Model
 {
+    // Scenarios
+    // =========================================================================
+    const SCENARIO_CONTENT = 'content';
+    const SCENARIO_NEW_CONTENT = 'newContent';
+
     // Constants
     // =========================================================================
 
@@ -72,6 +77,11 @@ class Message extends Model
     public $contentId;
 
     /**
+     * @var ElementInterface|null Save a new content element when a new message saving.
+     */
+    public $newContent;
+
+    /**
      * @var ElementInterface|null
      */
     private $_sender;
@@ -106,7 +116,9 @@ class Message extends Model
     {
         $rules = parent::rules();
         $rules = array_merge($rules, [
-            [['senderId', 'targetId', 'contentId', 'postDate'], 'required'],
+            [['senderId', 'targetId', 'postDate'], 'required'],
+            [['contentId'], 'required', 'on' => self::SCENARIO_CONTENT],
+            [['newContent'], 'required', 'on' => self::SCENARIO_NEW_CONTENT],
             [['id', 'senderId', 'targetId', 'contentId'], 'integer'],
             [['postDate'], DateTimeValidator::class],
         ]);

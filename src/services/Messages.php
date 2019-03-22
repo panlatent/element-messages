@@ -10,7 +10,6 @@ namespace panlatent\elementmessages\services;
 
 use Craft;
 use craft\base\Element;
-use craft\base\ElementInterface;
 use craft\helpers\Db;
 use craft\helpers\Json;
 use panlatent\elementmessages\errors\MessageException;
@@ -163,6 +162,12 @@ class Messages extends Component
             return false;
         }
 
+        if (empty($message->newContent)) {
+            $message->setScenario(Message::SCENARIO_CONTENT);
+        } else {
+            $message->setScenario(Message::SCENARIO_NEW_CONTENT);
+        }
+
         if ($runValidation && !$message->validate()) {
             Craft::info('Message not saved due to validation error.', __METHOD__);
             return false;
@@ -181,18 +186,15 @@ class Messages extends Component
                 $record = new MessageRecord();
             }
 
-            if ($message->contentId === null) {
-                $content = $message->getContent();
+            if ($message->newContent) {
+                /** @var Element $newContent */
+                $newContent = $message->newContent;
 
-                /** @var Element $content */
-                if ($content instanceof ElementInterface) {
-                    if (!$content->id) {
-                        if (!Craft::$app->getElements()->saveElement($content)) {
-                            throw new MessageException('Do not save content element due: ' . Json::encode($content->getErrors()));
-                        }
-                    }
-                    $message->contentId = $content->id;
+                if (!Craft::$app->getElements()->saveElement($newContent)) {
+                    throw new MessageException('Do not save content element due: ' . Json::encode($newContent->getErrors()));
                 }
+
+                $message->contentId = $newContent->id;
             }
 
             $record->senderId = $message->senderId;
