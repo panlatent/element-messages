@@ -11,6 +11,7 @@ namespace panlatent\elementmessages\models;
 use Craft;
 use craft\base\ElementInterface;
 use craft\base\Model;
+use craft\events\ModelEvent;
 use craft\helpers\DateTimeHelper;
 use craft\validators\DateTimeValidator;
 use panlatent\elementmessages\base\MessageTargetInterface;
@@ -32,6 +33,24 @@ use yii\base\InvalidConfigException;
  */
 class Message extends Model
 {
+    // Constants
+    // =========================================================================
+
+    /**
+     * @event ModelEvent
+     * @see beforeSave()
+     */
+    const EVENT_BEFORE_SAVE = 'beforeSave';
+
+    /**
+     * @event ModelEvent
+     * @see afterSave()
+     */
+    const EVENT_AFTER_SAVE = 'afterSave';
+
+    // Properties
+    // =========================================================================
+
     /**
      * @var int|null
      */
@@ -212,6 +231,16 @@ class Message extends Model
      */
     public function beforeSave(bool $isNew): bool
     {
+        $event = new ModelEvent([
+            'isNew' => $isNew,
+        ]);
+
+        $this->trigger(self::EVENT_BEFORE_SAVE, $event);
+
+        if (!$event->isValid) {
+            return false;
+        }
+
         if ($isNew) {
             $target = $this->getTarget();
             if ($target instanceof MessageTargetInterface && !$target->isAcceptableMessage($this)) {
@@ -227,6 +256,12 @@ class Message extends Model
      */
     public function afterSave(bool $isNew)
     {
+        if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE)) {
+            $this->trigger(self::EVENT_AFTER_SAVE, new ModelEvent([
+                'isNew' => $isNew,
+            ]));
+        }
+
         $target = $this->getTarget();
 
         if ($target instanceof Component && $target->hasEventHandlers(MessageElement::EVENT_MESSAGE_ARRIVED)) {
