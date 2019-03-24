@@ -18,6 +18,7 @@ use panlatent\elementmessages\models\Message;
 use panlatent\elementmessages\models\MessageCriteria;
 use panlatent\elementmessages\records\Message as MessageRecord;
 use yii\base\Component;
+use yii\base\InvalidConfigException;
 use yii\db\Query;
 
 /**
@@ -250,6 +251,25 @@ class Messages extends Component
 
         if ($criteria->contentId) {
             $query->andWhere(Db::parseParam('contentId', $criteria->contentId));
+        }
+
+        if ($criteria->bothOf) {
+            if (!is_array($criteria->bothOf) || count($criteria->bothOf) != 2) {
+                throw new InvalidConfigException("bothOf must be an array with 2 elements");
+            }
+
+            list($b1, $b2) = array_values($criteria->bothOf);
+            $query->andWhere([
+                'or',
+                [
+                    'senderId' => $b1,
+                    'targetId' => $b2,
+                ],
+                [
+                    'senderId' => $b2,
+                    'targetId' => $b1,
+                ]
+            ]);
         }
 
         if ($criteria->firstId) {

@@ -42,6 +42,11 @@ class MessageCriteria extends Model
     public $contentId;
 
     /**
+     * @var int[]|null
+     */
+    public $bothOf;
+
+    /**
      * @var int|null First message id
      */
     public $firstId;

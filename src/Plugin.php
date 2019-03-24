@@ -24,6 +24,14 @@ class Plugin extends \craft\base\Plugin
 
     use Services;
 
+    // Properties
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public $schemaVersion = '0.1.0';
+
     // Public Methods
     // =========================================================================
 
