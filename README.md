@@ -77,3 +77,14 @@ $total = $messages->getTotalMessages([
 ]);
 
 ```
+
+For more query conditions, please refer to [`panlatent\elementmessages\models\MessageCriteria`](src/models/MessageCriteria.php).
+
+Documentation
+-------------
+
++ Read the Documentation: [English](https://element-messages.docs.panlatent.com/).
+
+License
+-------
+The Element Messages is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
