@@ -37,3 +37,43 @@ To install the plugin, follow these instructions.
 
 Usages
 ------
+
+### Create a message
+
+```php
+<?php
+
+use panlatent\elementmessages\Plugin;
+
+$messages = Plugin::getInstance()->getMessages();
+
+$message = $messages->createMessage([
+   'senderId' => 1,
+   'targetId' => 2,
+   'contentId' => 3,
+]);
+
+$messages->saveMessage($message);
+
+```
+
+### Messages Query
+
+```php
+<?php
+
+use panlatent\elementmessages\Plugin;
+
+$messages = Plugin::getInstance()->getMessages();
+
+$results = $messages->findMessages([
+    'senderId' => 1
+]);
+
+
+$total = $messages->getTotalMessages([
+    'senderId' => 1,
+    'targetId' => 2,
+]);
+
+```
