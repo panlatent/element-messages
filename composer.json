@@ -2,7 +2,7 @@
     "name": "panlatent/element-messages",
     "description": "Element Messages for CraftCMS 3",
     "type": "craft-plugin",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "keywords": [
         "craft",
         "cms",

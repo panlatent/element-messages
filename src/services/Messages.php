@@ -10,6 +10,7 @@ namespace panlatent\elementmessages\services;
 
 use Craft;
 use craft\base\Element;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
 use craft\helpers\Json;
 use panlatent\elementmessages\errors\MessageException;
@@ -17,6 +18,7 @@ use panlatent\elementmessages\events\MessageEvent;
 use panlatent\elementmessages\models\Message;
 use panlatent\elementmessages\models\MessageCriteria;
 use panlatent\elementmessages\records\Message as MessageRecord;
+use Throwable;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use yii\db\Query;
@@ -29,6 +31,12 @@ use yii\db\Query;
  */
 class Messages extends Component
 {
+    // Constants
+    // =========================================================================
+
+    // Events
+    // -------------------------------------------------------------------------
+
     /**
      * @event MessageEvent The event that is triggered before a message is saved.
      */
@@ -48,6 +56,9 @@ class Messages extends Component
      * @event MessageEvent The event that is triggered after a message is deleted.
      */
     const EVENT_AFTER_DELETE_MESSAGE = 'afterDeleteMessage';
+
+    // Public Methods
+    // =========================================================================
 
     /**
      * Find a message by criteria.
@@ -131,14 +142,16 @@ class Messages extends Component
     }
 
     /**
-     * Create a message.
-     *
-     * @param mixed $config
-     * @return Message
+     * @param int $messageId
+     * @return Message|null
      */
-    public function createMessage($config): Message
+    public function getMessageById(int $messageId)
     {
-        return new Message($config);
+        $result = $this->_createQuery()
+            ->where(['id' => $messageId])
+            ->one();
+
+        return $result ? new Message($result) : null;
     }
 
     /**
@@ -161,12 +174,6 @@ class Messages extends Component
 
         if (!$message->beforeSave($isNewMessage)) {
             return false;
-        }
-
-        if (empty($message->newContent)) {
-            $message->setScenario(Message::SCENARIO_CONTENT);
-        } else {
-            $message->setScenario(Message::SCENARIO_NEW_CONTENT);
         }
 
         if ($runValidation && !$message->validate()) {
@@ -201,7 +208,7 @@ class Messages extends Component
             $record->senderId = $message->senderId;
             $record->targetId = $message->targetId;
             $record->contentId = $message->contentId;
-            $record->postDate = $message->getPostDate();
+            $record->postDate = DateTimeHelper::toDateTime($message->postDate);
 
             $record->save(false);
 
@@ -210,7 +217,7 @@ class Messages extends Component
             }
 
             $transaction->commit();
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $transaction->rollBack();
 
             throw $exception;
@@ -228,6 +235,68 @@ class Messages extends Component
         return true;
     }
 
+    /**
+     * @param int $messageId
+     * @return bool
+     */
+    public function deleteMessageById(int $messageId): bool
+    {
+        $message = $this->getMessageById($messageId);
+        if (!$message) {
+            return false;
+        }
+
+        return $this->deleteMessage($message);
+    }
+
+    /**
+     * Delete a message.
+     *
+     * @param Message $message
+     * @return bool
+     */
+    public function deleteMessage(Message $message): bool
+    {
+        if ($this->hasEventHandlers(self::EVENT_BEFORE_DELETE_MESSAGE)) {
+            $this->trigger(self::EVENT_BEFORE_DELETE_MESSAGE, new MessageEvent([
+                'message' => $message,
+            ]));
+        }
+
+        if (!$message->beforeDelete()) {
+            return false;
+        }
+
+        $db = Craft::$app->getDb();
+
+        $transaction = $db->beginTransaction();
+        try {
+            $db->createCommand()
+                ->delete('{{%messages}}', [
+                    'id' => $message->id,
+                ])
+                ->execute();
+
+            $message->afterDelete();
+
+            $transaction->commit();
+        } catch (Throwable $exception) {
+            $transaction->rollBack();
+
+            throw $exception;
+        }
+
+        if ($this->hasEventHandlers(self::EVENT_AFTER_DELETE_MESSAGE)) {
+            $this->trigger(self::EVENT_AFTER_DELETE_MESSAGE, new MessageEvent([
+                'message' => $message,
+            ]));
+        }
+
+        return true;
+    }
+
+    // Private Methods
+    // =========================================================================
 
     /**
      * Applies WHERE conditions to a DbCommand query for messages.
@@ -320,7 +389,13 @@ class Messages extends Component
     private function _createQuery(): Query
     {
         return (new Query())
-            ->select(['id', 'senderId', 'targetId', 'contentId', 'postDate'])
-            ->from('{{%messages}}');
+            ->select([
+                'messages.id',
+                'messages.senderId',
+                'messages.targetId',
+                'messages.contentId',
+                'messages.postDate'
+            ])
+            ->from(['messages' => '{{%messages}}']);
     }
 }

@@ -1,0 +1,32 @@
+{% extends "elementmessages/_layouts/settings" %}
+
+{% set title = 'General Settings'|t('elementmessages') %}
+{% set fullPageForm = true %}
+
+{% set settings = craft.elementmessages.settings %}
+
+{% import "_includes/forms" as forms %}
+
+{% block content %}
+    <h2>{{ 'General Settings'|t('elementmessages') }}</h2>
+
+    <input type="hidden" name="action" value="elementmessages/settings/save-settings">
+    {{ redirectInput('elementmessages/settings') }}
+
+    {{ forms.textField({
+        label: 'CP Nav Name'|t('elementmessages'),
+        id: 'cpNavName',
+        name: 'cpNavName',
+        value: settings.cpNavName,
+        errors: settings.getErrors('settings'),
+    }) }}
+
+    {{ forms.textField({
+        label: 'Messages Page Size'|t('elementmessages'),
+        id: 'messagesPageSize',
+        name: 'messagesPageSize',
+        value: settings.messagesPageSize,
+        errors: settings.getErrors('messagesPageSize'),
+    }) }}
+
+{% endblock %}

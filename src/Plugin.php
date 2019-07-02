@@ -9,12 +9,20 @@
 namespace panlatent\elementmessages;
 
 use Craft;
+use craft\events\DefineBehaviorsEvent;
+use craft\web\twig\variables\CraftVariable;
+use panlatent\elementmessages\models\Settings;
 use panlatent\elementmessages\plugin\Services;
+use panlatent\elementmessages\user\Permissions;
+use panlatent\elementmessages\web\twig\CraftVariableBehavior;
+use yii\base\Event;
 
 /**
  * Class Plugin
  *
  * @package panlatent\elementmessages
+ * @property-read Settings $settings
+ * @method Settings getSettings()
  * @author Panlatent <panlatent@gmail.com>
  */
 class Plugin extends \craft\base\Plugin
@@ -30,7 +38,12 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public $schemaVersion = '0.1.0';
+    public $schemaVersion = '0.1.1';
+
+    /**
+     * @inheritdoc
+     */
+    public $t9nCategory = 'elementmessages';
 
     // Public Methods
     // =========================================================================
@@ -41,8 +54,73 @@ class Plugin extends \craft\base\Plugin
     public function init()
     {
         parent::init();
-        Craft::setAlias('@panlatent/elementmessages', $this->getBasePath());
+        Craft::setAlias('@elementmessages', $this->getBasePath());
 
+        $this->_registerVariables();
         $this->_setComponents();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCpNavItem()
+    {
+        $ret =  parent::getCpNavItem();
+
+        if ($this->getSettings()->cpNavName) {
+            $ret['label'] = $this->getSettings()->cpNavName;
+        } else {
+            $ret['label'] = Craft::t('elementmessages', 'Messages');
+        }
+
+        $user = Craft::$app->getUser();
+
+        if ($user->checkPermission(Permissions::MANAGE_MESSAGES)) {
+            $ret['subnav']['messages'] = [
+                'label' => Craft::t('elementmessages', 'Messages'),
+                'url' => 'elementmessages/messages',
+            ];
+        }
+
+        if ($user->checkPermission(Permissions::MANAGE_SETTINGS)) {
+            $ret['subnav']['settings'] = [
+                'label' => Craft::t('elementmessages', 'Settings'),
+                'url' => 'elementmessages/settings',
+            ];
+        }
+
+        return $ret;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSettingsResponse()
+    {
+        return Craft::$app->getResponse()->redirect('elementmessages/settings');
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    protected function createSettingsModel()
+    {
+        return new Settings();
+    }
+
+    // Private Methods
+    // =========================================================================
+
+    /**
+     * Register variables.
+     */
+    public function _registerVariables()
+    {
+        Event::on(CraftVariable::class, CraftVariable::EVENT_DEFINE_BEHAVIORS, function(DefineBehaviorsEvent $event) {
+            $event->behaviors[] = CraftVariableBehavior::class;
+        });
     }
 }

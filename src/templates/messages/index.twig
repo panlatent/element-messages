@@ -1,0 +1,76 @@
+{% extends "_layouts/cp" %}
+
+{% set title = 'Messages'|t('elementmessages') %}
+{% set selectedSubnavItem = 'messages' %}
+
+{% set page = craft.app.request.getQueryParam('page', 1) %}
+{% set pageSize = pageSize is defined ? pageSize : craft.elementmessages.settings.messagesPageSize %}
+{% set criteria = criteria is defined ? criteria : craft.elementmessages.settings.messagesPageCriteria %}
+
+{% if page < 1 %}
+    {% set page = 1 %}
+{% endif %}
+
+{% set criteria = criteria|merge({
+    offset: (page - 1)*pageSize,
+    limit: pageSize,
+}) %}
+
+{% set messages = craft.elementmessages.messages.findMessages(criteria) %}
+{% set totalMessages = craft.elementmessages.messages.getTotalMessages(criteria) %}
+{% set totalPages = (totalMessages/pageSize)|round(0, 'ceil') %}
+
+{% block content %}
+    <div id="nomessages"{% if messages %} class="hidden"{% endif %}>{{ 'No message exists yet.'|t('elementmessages') }}</div>
+
+    {% if messages|length %}
+        <table id="messages" class="data fullwidth">
+            <thead>
+                <tr>
+                    <th>{{ 'Name'|t('elementmessages') }}</th>
+                    <th>{{ 'Sender'|t('elementmessages') }}</th>
+                    <th>{{ 'Target'|t('elementmessages') }}</th>
+                    <th>{{ 'Content'|t('elementmessages') }}</th>
+                    <th>{{ 'Post Date'|t('elementmessages') }}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for message in messages %}
+                    <tr data-id="{{ message.id }}" data-name="{{ message.name }}">
+                        <td>{{ message.name }}</td>
+                        <td>{% include "_elements/element" with {element: message.sender} %}</td>
+                        <td>{% include "_elements/element" with {element: message.target} %}</td>
+                        <td>{% include "_elements/element" with {element: message.content} %}</td>
+                        <td>{{ message.postDate|datetime }}</td>
+                        <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="flex pagination">
+            <div class="page-info">
+                {{ '{start}-{end} of {total}'|t('dingtalk', {
+                    start: criteria.offset + 1,
+                    end: criteria.offset + messages|length,
+                    total: totalMessages
+                }) }}
+            </div>
+
+            {% set hasPrev = (page != 1) %}
+            {% set hasNext = (page < totalPages) %}
+            <a class="page-link{% if not hasPrev %} disabled{% endif %}"{% if hasPrev %} href="{{ url('elementmessages/messages', {page: page - 1}) }}"{% endif %} data-icon="leftangle" title="Newer messages"></a>
+            <a class="page-link{% if not hasNext %} disabled{% endif %}"{% if hasNext %} href="{{ url('elementmessages/messages', {page: page + 1}) }}"{% endif %} data-icon="rightangle" title="Older messages"></a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% js %}
+    var adminTable = new Craft.AdminTable({
+        tableSelector: '#messages',
+        noItemsSelector: '#nomessages',
+        deleteAction: 'elementmessages/messages/delete-message',
+        confirmDeleteMessage: '{{ "Are you sure you want to delete this message?"|t('elementmessages') }}'
+    });
+{% endjs %}

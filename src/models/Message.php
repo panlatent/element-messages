@@ -12,8 +12,8 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\base\Model;
 use craft\events\ModelEvent;
-use craft\helpers\DateTimeHelper;
 use craft\validators\DateTimeValidator;
+use DateTime;
 use panlatent\elementmessages\base\MessageTargetInterface;
 use yii\base\InvalidConfigException;
 
@@ -24,19 +24,16 @@ use yii\base\InvalidConfigException;
  * @property-read bool $isNew
  * @property ElementInterface $sender
  * @property ElementInterface $target
- * @property \DateTime|null $postDate
- * @property ElementInterface|string|null $content
+ * @property ElementInterface|null $content
  * @author Panlatent <panlatent@gmail.com>
  */
 class Message extends Model
 {
-    // Scenarios
-    // =========================================================================
-    const SCENARIO_CONTENT = 'content';
-    const SCENARIO_NEW_CONTENT = 'newContent';
-
     // Constants
     // =========================================================================
+
+    // Events
+    // -------------------------------------------------------------------------
 
     /**
      * @event ModelEvent
@@ -49,6 +46,18 @@ class Message extends Model
      * @see afterSave()
      */
     const EVENT_AFTER_SAVE = 'afterSave';
+
+    /**
+     * @event ModelEvent
+     * @see beforeDelete()
+     */
+    const EVENT_BEFORE_DELETE = 'beforeDelete';
+
+    /**
+     * @event ModelEvent
+     * @see afterDelete()
+     */
+    const EVENT_AFTER_DELETE = 'afterDelete';
 
     // Properties
     // =========================================================================
@@ -79,6 +88,11 @@ class Message extends Model
     public $newContent;
 
     /**
+     * @var DateTime|null
+     */
+    public $postDate;
+
+    /**
      * @var ElementInterface|null
      */
     private $_sender;
@@ -93,10 +107,8 @@ class Message extends Model
      */
     private $_content;
 
-    /**
-     * @var \DateTime|null
-     */
-    private $_postDate;
+    // Public Methods
+    // =========================================================================
 
     /**
      * @return string
@@ -112,15 +124,22 @@ class Message extends Model
     public function rules()
     {
         $rules = parent::rules();
-        $rules = array_merge($rules, [
-            [['senderId', 'targetId', 'postDate'], 'required'],
-            [['contentId'], 'required', 'on' => self::SCENARIO_CONTENT],
-            [['newContent'], 'required', 'on' => self::SCENARIO_NEW_CONTENT],
-            [['id', 'senderId', 'targetId', 'contentId'], 'integer'],
-            [['postDate'], DateTimeValidator::class],
-        ]);
+        $rules[] = [['senderId', 'targetId', 'postDate'], 'required'];
+        $rules[] = [['id', 'senderId', 'targetId', 'contentId'], 'integer'];
+        $rules[] = [['postDate'], DateTimeValidator::class];
 
         return $rules;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function datetimeAttributes(): array
+    {
+        $attributes = parent::datetimeAttributes();
+        $attributes[] = 'postDate';
+
+        return  $attributes;
     }
 
     /**
@@ -129,6 +148,25 @@ class Message extends Model
     public function getIsNew(): bool
     {
         return !$this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        if ($this->contentId) {
+            return Craft::t('elementmessages', '{sender} sends {content} to {target}', [
+                'sender' => $this->getSender()::displayName(),
+                'target' => $this->getTarget()::displayName(),
+                'content' =>  $this->getContent()::displayName(),
+            ]);
+        }
+
+        return Craft::t('elementmessages', '{sender} sends empty content to {target}', [
+            'sender' => $this->getSender()::displayName(),
+            'target' => $this->getTarget()::displayName(),
+        ]);
     }
 
     /**
@@ -141,12 +179,11 @@ class Message extends Model
         }
 
         if ($this->senderId === null) {
-            throw new InvalidConfigException();
+            throw new InvalidConfigException('Message is missing its sender ID');
         }
 
-        $this->_sender = Craft::$app->getElements()->getElementById($this->senderId);
-        if ($this->_sender === null) {
-            throw new InvalidConfigException();
+        if (($this->_sender = Craft::$app->getElements()->getElementById($this->senderId)) === null) {
+            throw new InvalidConfigException('Invalid message sender ID');
         }
 
         return $this->_sender;
@@ -170,12 +207,11 @@ class Message extends Model
         }
 
         if ($this->targetId === null) {
-            throw new InvalidConfigException();
+            throw new InvalidConfigException('Message is missing its target ID');
         }
 
-        $this->_target = Craft::$app->getElements()->getElementById($this->targetId);
-        if ($this->_target === null) {
-            throw new InvalidConfigException();
+        if (($this->_target = Craft::$app->getElements()->getElementById($this->targetId)) === null) {
+            throw new InvalidConfigException('Invalid message target ID');
         }
 
         return $this->_target;
@@ -190,7 +226,7 @@ class Message extends Model
     }
 
     /**
-     * @return ElementInterface|string|null
+     * @return ElementInterface|null
      */
     public function getContent()
     {
@@ -198,40 +234,23 @@ class Message extends Model
             return $this->_content;
         }
 
-        if (!$this->contentId) {
-            throw new InvalidConfigException();
+        if ($this->contentId === null) {
+            return null;
         }
 
-        $this->_content = Craft::$app->getElements()->getElementById($this->contentId);
-        if ($this->_content === null) {
-            throw new InvalidConfigException();
+        if (($this->_content = Craft::$app->getElements()->getElementById($this->contentId)) === null) {
+            throw new InvalidConfigException('Invalid message content ID');
         }
 
         return $this->_content;
     }
 
     /**
-     * @param ElementInterface|string|null $content
+     * @param ElementInterface|null $content
      */
-    public function setContent($content)
+    public function setContent(ElementInterface $content = null)
     {
         $this->_content = $content;
-    }
-
-    /**
-     * @return \DateTime|null
-     */
-    public function getPostDate()
-    {
-        return $this->_postDate;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    public function setPostDate($value)
-    {
-        $this->_postDate = DateTimeHelper::toDateTime($value);
     }
 
     /**
@@ -274,6 +293,32 @@ class Message extends Model
             $this->trigger(self::EVENT_AFTER_SAVE, new ModelEvent([
                 'isNew' => $isNew,
             ]));
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function beforeDelete(): bool
+    {
+        if ($this->hasEventHandlers(self::EVENT_BEFORE_DELETE)) {
+            $event = new ModelEvent();
+
+            $this->trigger(self::EVENT_BEFORE_DELETE, $event);
+
+            return $event->isValid;
+        }
+
+        return true;
+    }
+
+    /**
+     * After delete.
+     */
+    public function afterDelete()
+    {
+        if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE)) {
+            $this->trigger(self::EVENT_AFTER_DELETE, new ModelEvent());
         }
     }
 }

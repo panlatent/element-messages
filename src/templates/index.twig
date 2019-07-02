@@ -1,0 +1,7 @@
+{% if currentUser.can('elementmessages-manageMessages') %}
+    {% redirect('elementmessages/messages') %}
+{% elseif currentUser.can('elementmessages-manageSettings') %}
+    {% redirect('elementmessages/settings') %}
+{% else %}
+    {% exit 404 %}
+{% endif %}
