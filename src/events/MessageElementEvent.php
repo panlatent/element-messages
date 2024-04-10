@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2019 panlatent@gmail.com
  */
 
-namespace panlatent\elementmessages\event;
+namespace panlatent\elementmessages\events;
 
 use craft\base\ElementInterface;
 use craft\events\ModelEvent;

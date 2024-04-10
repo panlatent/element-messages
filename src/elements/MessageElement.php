@@ -13,7 +13,7 @@ use panlatent\elementmessages\base\MessageSender;
 use panlatent\elementmessages\base\MessageSenderInterface;
 use panlatent\elementmessages\base\MessageTarget;
 use panlatent\elementmessages\base\MessageTargetInterface;
-use panlatent\elementmessages\event\MessageElementEvent;
+use panlatent\elementmessages\events\MessageElementEvent;
 use panlatent\elementmessages\events\MessageEvent;
 use panlatent\elementmessages\models\Message;
 
