@@ -75,7 +75,7 @@ class Messages extends Component
         $criteria->limit = 1;
         $messages = $this->findMessages($criteria);
 
-        if (is_array($messages) && !empty($messages)) {
+        if (!empty($messages)) {
             return array_pop($messages);
         }
 
