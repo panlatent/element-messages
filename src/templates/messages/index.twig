@@ -20,6 +20,10 @@
 {% set totalMessages = craft.elementmessages.messages.getTotalMessages(criteria) %}
 {% set totalPages = (totalMessages/pageSize)|round(0, 'ceil') %}
 
+{% block actionButton %}
+    <a href="{{ url('elementmessages/messages/new') }}" class="submit btn add icon">{{ "New message"|t('elementmessages') }}</a>
+{% endblock %}
+
 {% block content %}
     <div id="nomessages"{% if messages %} class="hidden"{% endif %}>{{ 'No message exists yet.'|t('elementmessages') }}</div>
 

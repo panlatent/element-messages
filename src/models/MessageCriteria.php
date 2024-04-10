@@ -9,6 +9,7 @@
 namespace panlatent\elementmessages\models;
 
 use craft\base\Model;
+use panlatent\elementmessages\db\MessageQueryTrait;
 
 /**
  * Class MessageCriteria
@@ -18,28 +19,13 @@ use craft\base\Model;
  */
 class MessageCriteria extends Model
 {
-    // Properties
+    // Traits
     // =========================================================================
 
-    /**
-     * @var int|null ID
-     */
-    public $id;
+    use MessageQueryTrait;
 
-    /**
-     * @var int|null
-     */
-    public $senderId;
-
-    /**
-     * @var int|null
-     */
-    public $targetId;
-
-    /**
-     * @var int|null
-     */
-    public $contentId;
+    // Properties
+    // =========================================================================
 
     /**
      * @var int[]|null

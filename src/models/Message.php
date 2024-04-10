@@ -15,6 +15,9 @@ use craft\events\ModelEvent;
 use craft\validators\DateTimeValidator;
 use DateTime;
 use panlatent\elementmessages\base\MessageTargetInterface;
+use panlatent\elementmessages\db\MessageQuery;
+use panlatent\elementmessages\helpers\ElementHelper;
+use panlatent\elementmessages\Plugin;
 use yii\base\InvalidConfigException;
 
 /**
@@ -22,9 +25,9 @@ use yii\base\InvalidConfigException;
  *
  * @package panlatent\elementmessages\models
  * @property-read bool $isNew
- * @property ElementInterface $sender
- * @property ElementInterface $target
- * @property ElementInterface|null $content
+ * @property-read  ElementInterface $sender
+ * @property-read  ElementInterface $target
+ * @property-read  ElementInterface|null $content
  * @author Panlatent <panlatent@gmail.com>
  */
 class Message extends Model
@@ -65,27 +68,32 @@ class Message extends Model
     /**
      * @var int|null
      */
-    public $id;
+    public ?int $id = null;
 
     /**
      * @var int|null
      */
-    public $senderId;
+    public ?int $channelId = null;
 
     /**
      * @var int|null
      */
-    public $targetId;
+    public ?int $senderId  = null;
 
     /**
      * @var int|null
      */
-    public $contentId;
+    public ?int $targetId = null;
+
+    /**
+     * @var int|null
+     */
+    public ?int $contentId = null;
 
     /**
      * @var ElementInterface|null Save a new content element when a new message saving.
      */
-    public $newContent;
+    public ?ElementInterface $newContent = null;
 
     /**
      * @var DateTime|null
@@ -95,17 +103,30 @@ class Message extends Model
     /**
      * @var ElementInterface|null
      */
-    private $_sender;
+    private ?ElementInterface $_sender = null;
 
     /**
      * @var ElementInterface|null
      */
-    private $_target;
+    private ?ElementInterface $_target = null;
 
     /**
      * @var ElementInterface|null
      */
-    private $_content;
+    private ?ElementInterface $_content = null;
+
+    // Static Methods
+    // =========================================================================
+
+    public static function create(): MessageBuilder
+    {
+        return new MessageBuilder();
+    }
+
+    public static function find(): MessageQuery
+    {
+        return new MessageQuery();
+    }
 
     // Public Methods
     // =========================================================================
@@ -138,6 +159,10 @@ class Message extends Model
     {
         return !$this->id;
     }
+    public function getChannel(): Channel
+    {
+        return Plugin::getInstance()->getChannels()->getChannelById($this->channelId);
+    }
 
     /**
      * @return string
@@ -146,16 +171,21 @@ class Message extends Model
     {
         if ($this->contentId) {
             return Craft::t('elementmessages', '{sender} sends {content} to {target}', [
-                'sender' => $this->getSender()::displayName(),
-                'target' => $this->getTarget()::displayName(),
-                'content' =>  $this->getContent()::displayName(),
+                'sender' => ElementHelper::getFriendlyName($this->getSender()),
+                'target' => ElementHelper::getFriendlyName($this->getTarget()),
+                'content' => ElementHelper::getFriendlyName($this->getContent()),
             ]);
         }
 
         return Craft::t('elementmessages', '{sender} sends empty content to {target}', [
-            'sender' => $this->getSender()::displayName(),
-            'target' => $this->getTarget()::displayName(),
+            'sender' => ElementHelper::getFriendlyName($this->getSender()),
+            'target' => ElementHelper::getFriendlyName($this->getTarget()),
         ]);
+    }
+
+    public function getRefType(): string
+    {
+        return sprintf('%s>%s::%s', $this->getSender()::refHandle(), $this->getTarget()::refHandle(), $this->contentId ? $this->getContent()::refHandle() : 'empty');
     }
 
     /**
@@ -179,14 +209,6 @@ class Message extends Model
     }
 
     /**
-     * @param ElementInterface $sender
-     */
-    public function setSender(ElementInterface $sender)
-    {
-        $this->_sender = $sender;
-    }
-
-    /**
      * @return ElementInterface
      */
     public function getTarget(): ElementInterface
@@ -206,18 +228,11 @@ class Message extends Model
         return $this->_target;
     }
 
-    /**
-     * @param ElementInterface $target
-     */
-    public function setTarget(ElementInterface $target)
-    {
-        $this->_target = $target;
-    }
 
     /**
      * @return ElementInterface|null
      */
-    public function getContent()
+    public function getContent(): ?ElementInterface
     {
         if ($this->_content !== null) {
             return $this->_content;
@@ -232,14 +247,6 @@ class Message extends Model
         }
 
         return $this->_content;
-    }
-
-    /**
-     * @param ElementInterface|null $content
-     */
-    public function setContent(ElementInterface $content = null)
-    {
-        $this->_content = $content;
     }
 
     /**

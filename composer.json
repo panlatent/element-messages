@@ -1,6 +1,6 @@
 {
     "name": "panlatent/element-messages",
-    "description": "Element Messages for CraftCMS 3",
+    "description": "Element Messages for CraftCMS",
     "type": "craft-plugin",
     "keywords": [
         "craft",

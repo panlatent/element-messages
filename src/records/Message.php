@@ -9,6 +9,7 @@
 namespace panlatent\elementmessages\records;
 
 use craft\db\ActiveRecord;
+use craft\helpers\DateTimeHelper;
 use DateTime;
 use DateTimeZone;
 use yii\db\Query;
@@ -30,7 +31,7 @@ class Message extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%messages}}';
     }
@@ -45,7 +46,7 @@ class Message extends ActiveRecord
                 $lastSortOrder = (new Query())
                     ->select('sortOrder')
                     ->from('{{%messages}}')
-                    ->where(['postDate' => $this->postDate->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')])
+                    ->where(['postDate' => DateTimeHelper::toDateTime($this->postDate)->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')])
                     ->orderBy(['sortOrder' => SORT_DESC])
                     ->scalar();
 

@@ -13,6 +13,7 @@ use craft\base\Element;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
 use craft\helpers\Json;
+use panlatent\elementmessages\db\MessageQuery as Query;
 use panlatent\elementmessages\errors\MessageException;
 use panlatent\elementmessages\events\MessageEvent;
 use panlatent\elementmessages\models\Message;
@@ -21,7 +22,6 @@ use panlatent\elementmessages\records\Message as MessageRecord;
 use Throwable;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
-use yii\db\Query;
 
 /**
  * Class Messages
@@ -304,30 +304,34 @@ class Messages extends Component
      * @param Query $query
      * @param MessageCriteria $criteria
      */
-    private function _applyMessageConditions(Query $query, MessageCriteria $criteria)
+    private function _applyMessageConditions(Query $query, MessageCriteria $criteria): void
     {
-        if ($criteria->id) {
-            $query->andWhere(Db::parseParam('id', $criteria->id));
+        foreach ($criteria->toArray() as $name => $value) {
+            if ($query->canSetProperty($name)) {
+                $query->$name = $value;
+            }
         }
 
-        if ($criteria->senderId) {
-            $query->andWhere(Db::parseParam('senderId', $criteria->senderId));
-        }
-
-        if ($criteria->targetId) {
-            $query->andWhere(Db::parseParam('targetId', $criteria->targetId));
-        }
-
-        if ($criteria->contentId) {
-            $query->andWhere(Db::parseParam('contentId', $criteria->contentId));
-        }
+//        $query->id = $criteria->id;
+//        $query->senderId = $criteria->senderId;
+//        if ($criteria->senderId) {
+//            $query->andWhere(Db::parseParam('senderId', $criteria->senderId));
+//        }
+//
+//        if ($criteria->targetId) {
+//            $query->andWhere(Db::parseParam('targetId', $criteria->targetId));
+//        }
+//
+//        if ($criteria->contentId) {
+//            $query->andWhere(Db::parseParam('contentId', $criteria->contentId));
+//        }
 
         if ($criteria->bothOf) {
             if (!is_array($criteria->bothOf) || count($criteria->bothOf) != 2) {
                 throw new InvalidConfigException("bothOf must be an array with 2 elements");
             }
 
-            list($b1, $b2) = array_values($criteria->bothOf);
+            [$b1, $b2] = array_values($criteria->bothOf);
             $query->andWhere([
                 'or',
                 [
@@ -388,14 +392,6 @@ class Messages extends Component
      */
     private function _createQuery(): Query
     {
-        return (new Query())
-            ->select([
-                'messages.id',
-                'messages.senderId',
-                'messages.targetId',
-                'messages.contentId',
-                'messages.postDate'
-            ])
-            ->from(['messages' => '{{%messages}}']);
+        return new Query();
     }
 }

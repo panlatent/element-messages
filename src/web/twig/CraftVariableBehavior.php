@@ -8,6 +8,8 @@
 
 namespace panlatent\elementmessages\web\twig;
 
+use Craft;
+use panlatent\elementmessages\db\MessageQuery;
 use panlatent\elementmessages\Plugin;
 use yii\base\Behavior;
 
@@ -25,7 +27,7 @@ class CraftVariableBehavior extends Behavior
     /**
      * @var Plugin
      */
-    public $elementmessages;
+    public Plugin $elementmessages;
 
     // Public Methods
     // =========================================================================
@@ -38,5 +40,12 @@ class CraftVariableBehavior extends Behavior
         parent::init();
 
         $this->elementmessages = Plugin::getInstance();
+    }
+
+    public function messages(array $criteria = []): MessageQuery
+    {
+        $query = new MessageQuery();
+        Craft::configure($query, $criteria);
+        return $query;
     }
 }
