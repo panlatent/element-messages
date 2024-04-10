@@ -66,7 +66,7 @@ class Messages extends Component
      * @param mixed $criteria
      * @return Message|null
      */
-    public function findMessage($criteria = null)
+    public function findMessage($criteria = null): ?Message
     {
         if (!($criteria instanceof MessageCriteria)) {
             $criteria = new MessageCriteria($criteria);

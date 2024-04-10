@@ -9,6 +9,7 @@
 namespace panlatent\elementmessages\records;
 
 use craft\db\ActiveRecord;
+use DateTime;
 use DateTimeZone;
 use yii\db\Query;
 
@@ -20,7 +21,7 @@ use yii\db\Query;
  * @property int $senderId
  * @property int $targetId
  * @property int $contentId
- * @property \DateTime $postDate
+ * @property DateTime $postDate
  * @property int $sortOrder
  * @author Panlatent <panlatent@gmail.com>
  */
@@ -37,7 +38,7 @@ class Message extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public function beforeSave($insert)
+    public function beforeSave($insert): bool
     {
         if ($insert) {
             if ($this->sortOrder === null) {

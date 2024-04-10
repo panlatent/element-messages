@@ -2,7 +2,6 @@
     "name": "panlatent/element-messages",
     "description": "Element Messages for CraftCMS 3",
     "type": "craft-plugin",
-    "version": "0.1.1",
     "keywords": [
         "craft",
         "cms",
@@ -23,7 +22,8 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.1.0"
+        "php": ">=8.0.2",
+        "craftcms/cms": "^3.1|^4.0"
     },
     "autoload": {
         "psr-4": {
@@ -37,5 +37,11 @@
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/panlatent/element-messages/master/CHANGELOG.md",
         "class": "panlatent\\elementmessages\\Plugin"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
     }
 }

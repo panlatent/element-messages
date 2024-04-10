@@ -8,7 +8,8 @@
 
 namespace panlatent\elementmessages\models;
 
-use yii\base\Model;
+
+use craft\base\Model;
 
 /**
  * Class Settings

@@ -38,12 +38,12 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public $schemaVersion = '0.1.1';
+    public string $schemaVersion = '0.2.0';
 
     /**
      * @inheritdoc
      */
-    public $t9nCategory = 'elementmessages';
+    public ?string $t9nCategory = 'elementmessages';
 
     // Public Methods
     // =========================================================================
@@ -63,7 +63,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public function getCpNavItem()
+    public function getCpNavItem(): ?array
     {
         $ret =  parent::getCpNavItem();
 
@@ -95,7 +95,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public function getSettingsResponse()
+    public function getSettingsResponse(): mixed
     {
         return Craft::$app->getResponse()->redirect('elementmessages/settings');
     }
@@ -106,7 +106,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): Settings
     {
         return new Settings();
     }

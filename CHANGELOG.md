@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 
+## 0.2.0 - 2024-04-10
+### Updated
+- Support CraftCMS 4.x
+
 ## 0.1.1 - 2019-07-02
 
 ### Added

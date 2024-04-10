@@ -90,7 +90,7 @@ class Message extends Model
     /**
      * @var DateTime|null
      */
-    public $postDate;
+    public ?DateTime $postDate = null;
 
     /**
      * @var ElementInterface|null
@@ -121,7 +121,7 @@ class Message extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = parent::rules();
         $rules[] = [['senderId', 'targetId', 'postDate'], 'required'];
@@ -129,17 +129,6 @@ class Message extends Model
         $rules[] = [['postDate'], DateTimeValidator::class];
 
         return $rules;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function datetimeAttributes(): array
-    {
-        $attributes = parent::datetimeAttributes();
-        $attributes[] = 'postDate';
-
-        return  $attributes;
     }
 
     /**
